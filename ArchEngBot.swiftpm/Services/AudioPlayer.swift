@@ -23,8 +23,10 @@ final class AudioPlayer: NSObject {
     }
 
     func play(text: String) async {
+        print("[AudioPlayer] tap text=\"\(text.prefix(40))\"")
         // Same text already playing → toggle stop.
         if currentlyPlayingText == text {
+            print("[AudioPlayer] already playing same text → stop")
             stop()
             return
         }
@@ -34,15 +36,18 @@ final class AudioPlayer: NSObject {
 
         do {
             let data = try await client.textToSpeech(text: text)
+            print("[AudioPlayer] TTS bytes=\(data.count)")
             try activateSession()
             let p = try AVAudioPlayer(data: data)
             p.delegate = self
             p.prepareToPlay()
             self.player = p
             self.currentlyPlayingText = text
-            p.play()
+            let ok = p.play()
+            print("[AudioPlayer] play() returned \(ok), duration=\(p.duration)s, volume=\(p.volume)")
         } catch {
-            print("[AudioPlayer] play failed: \(error.localizedDescription)")
+            let ns = error as NSError
+            print("[AudioPlayer] play FAILED: \(ns.localizedDescription) | code=\(ns.code) domain=\(ns.domain)")
         }
     }
 
@@ -59,6 +64,7 @@ final class AudioPlayer: NSObject {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playback, mode: .default, options: [])
         try session.setActive(true)
+        print("[AudioPlayer] session category=\(session.category.rawValue) active=\(session.isOtherAudioPlaying ? "other" : "ok")")
     }
 
     private func deactivateSession() {
@@ -70,6 +76,7 @@ final class AudioPlayer: NSObject {
 extension AudioPlayer: AVAudioPlayerDelegate {
     nonisolated func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         Task { @MainActor in
+            print("[AudioPlayer] finished successfully=\(flag)")
             self.player = nil
             self.currentlyPlayingText = nil
             self.deactivateSession()

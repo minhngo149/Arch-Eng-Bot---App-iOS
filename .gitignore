@@ -1,4 +1,13 @@
-# Xcode
+# Local config (must be created from Config.json.example)
+ArchEngBot.swiftpm/Resources/Config.json
+
+# Swift Package Manager / Playgrounds
+.build/
+.swiftpm/xcode/
+.swiftpm/configuration/
+Package.resolved
+
+# Xcode (in case anyone opens .swiftpm in Xcode)
 *.xcodeproj/
 *.xcworkspace/
 xcuserdata/
@@ -6,23 +15,11 @@ xcuserdata/
 DerivedData/
 build/
 
-# Swift Package Manager
-.build/
-.swiftpm/
-Package.resolved
-
 # macOS
 .DS_Store
 
-# Generated
+# Misc
 *.hmap
 *.ipa
 *.dSYM.zip
 *.dSYM
-
-# Fastlane / CocoaPods (nếu dùng sau này)
-Pods/
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots/**/*.png
-fastlane/test_output

@@ -19,7 +19,7 @@ enum APIError: LocalizedError {
         case .io(let err):
             return err.localizedDescription
         case .missingSecret:
-            return "Thiếu API secret. Cấu hình API_SECRET trong build settings."
+            return "Thiếu API secret. Tạo Resources/Config.json từ Config.json.example và điền secret."
         }
     }
 }

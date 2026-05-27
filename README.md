@@ -17,7 +17,7 @@ dưới dạng tin nhắn từ "Coach", và có thể phản hồi bằng text h
 | Nghe phát âm | Nút 🔊 cạnh mỗi vocab / dialogue line | `POST /api/text-to-speech` (BE TBD) — phát audio qua loa app bằng `AVAudioPlayer` |
 | Hiện/ẩn nghĩa VI | Nút 👁 VI cạnh mỗi vocab / dialogue line | Ẩn `meaning_vi` / `translation_vi` mặc định để user đọc thử tiếng Anh trước |
 | Gửi tin nhắn text | Nhập vào ô input → nút mũi tên | Append vào chat (chưa có AI reply — BE chat endpoint TBD) |
-| Ghi âm giọng nói | Nút **mic** ở input bar (xuất hiện khi ô text trống) | Record `.m4a` → upload `POST /audio/transcribe` (BE TBD) → transcript bubble |
+| Ghi âm giọng nói | Nút **mic** ở input bar (xuất hiện khi ô text trống) | Record `.m4a` (16 kHz mono AAC) → upload `POST /api/speech-to-text` → transcript bubble có 🔊 + 👁 VI |
 
 ## Stack
 
@@ -144,12 +144,19 @@ Response: raw audio bytes (audio/mpeg | audio/mp4 | audio/wav)
 Client (`AudioPlayer.swift`) chỉ cần raw bytes — `AVAudioPlayer` tự detect format.
 Khi BE implement xong, nút 🔊 trong mỗi vocab/dialogue sẽ play được.
 
-### 4. Voice → transcript (BE TBD)
+### 4. Voice → transcript (speech-to-text)
 ```
-POST {baseURL}/audio/transcribe
-multipart/form-data: target_text (optional), audio_file (audio/mp4)
+POST {baseURL}/api/speech-to-text?secret={api_secret}
+Content-Type: multipart/form-data
+
+Part: name="audio", filename="recording.m4a", Content-Type: audio/mp4
+
+Response: { "text": "verbatim transcript", "translation_vi": "Vietnamese translation" }
 ```
-BE chưa implement — voice button sẽ record OK nhưng upload fail.
+App ghi âm 16 kHz mono AAC trong container `.m4a`, upload qua field
+`audio`. BE chạy Gemini, trả về cả transcript gốc và translation. UI
+hiển thị transcript trong user bubble, kèm 🔊 (TTS phát lại) và 👁 VI
+(reveal translation).
 
 ## Permissions
 

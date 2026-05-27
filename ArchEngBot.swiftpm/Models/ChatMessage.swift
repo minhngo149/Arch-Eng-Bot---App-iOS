@@ -30,12 +30,13 @@ struct ChatMessage: Identifiable, Equatable {
 }
 
 struct TranscriptResult: Decodable, Equatable {
-    let transcript: String
-    let matchesTarget: Bool?
-    let feedback: String?
+    /// Verbatim transcript in the spoken language (typically English).
+    let text: String
+    /// Vietnamese translation provided by BE. Optional in case BE omits it.
+    let translationVi: String?
 
     enum CodingKeys: String, CodingKey {
-        case transcript, feedback
-        case matchesTarget = "matches_target"
+        case text
+        case translationVi = "translation_vi"
     }
 }

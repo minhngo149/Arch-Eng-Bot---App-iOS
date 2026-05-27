@@ -230,6 +230,21 @@ private struct DialogueLineCard: View {
 
 private struct ShowViToggle: View {
     @Binding var isOn: Bool
+    var onDarkBackground: Bool = false
+
+    private var foreground: Color {
+        if onDarkBackground {
+            return isOn ? .blue : .white.opacity(0.85)
+        }
+        return isOn ? .white : .secondary
+    }
+
+    private var background: Color {
+        if onDarkBackground {
+            return isOn ? .white : .white.opacity(0.22)
+        }
+        return isOn ? .blue : .gray.opacity(0.15)
+    }
 
     var body: some View {
         Button {
@@ -241,12 +256,10 @@ private struct ShowViToggle: View {
                 Text("VI")
                     .font(.system(size: 10, weight: .bold))
             }
-            .foregroundStyle(isOn ? Color.white : Color.secondary)
+            .foregroundStyle(foreground)
             .padding(.horizontal, 7)
             .padding(.vertical, 4)
-            .background(
-                Capsule().fill(isOn ? Color.blue : Color.gray.opacity(0.15))
-            )
+            .background(Capsule().fill(background))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(isOn ? "Hide Vietnamese translation" : "Show Vietnamese translation")
@@ -257,28 +270,35 @@ private struct ShowViToggle: View {
 
 private struct VoiceTranscriptCard: View {
     let result: TranscriptResult
+    @State private var showVi: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 Image(systemName: "waveform")
                     .font(.caption)
-                if let matches = result.matchesTarget {
-                    Image(systemName: matches ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundStyle(matches ? .green : .yellow)
-                        .font(.caption)
+                    .foregroundStyle(.white.opacity(0.75))
+                Spacer(minLength: 4)
+                VoicePlayButton(text: result.text, size: 14, onDarkBackground: true)
+                if result.translationVi != nil {
+                    ShowViToggle(isOn: $showVi, onDarkBackground: true)
                 }
             }
-            Text(result.transcript)
+            Text(result.text)
                 .font(.callout)
                 .fixedSize(horizontal: false, vertical: true)
-            if let feedback = result.feedback, !feedback.isEmpty {
-                Text(feedback)
+            if showVi, let vi = result.translationVi, !vi.isEmpty {
+                Text(vi)
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.85))
                     .fixedSize(horizontal: false, vertical: true)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity
+                    ))
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: showVi)
     }
 }
 
@@ -288,7 +308,7 @@ private struct VoiceTranscriptCard: View {
             MessageBubbleView(message: .init(role: .system, kind: .text("Tap 📚 above to load today's lesson, or ✨ to generate a new one.")))
             MessageBubbleView(message: .init(role: .coach, kind: .text("Welcome to today's lesson.")))
             MessageBubbleView(message: .init(role: .user, kind: .text("Hi! I'm ready.")))
-            MessageBubbleView(message: .init(role: .user, kind: .voiceTranscript(TranscriptResult(transcript: "She sells seashells.", matchesTarget: true, feedback: "Nice pronunciation!"))))
+            MessageBubbleView(message: .init(role: .user, kind: .voiceTranscript(TranscriptResult(text: "She sells seashells by the seashore.", translationVi: "Cô ấy bán vỏ sò bên bờ biển."))))
         }
         .padding()
     }

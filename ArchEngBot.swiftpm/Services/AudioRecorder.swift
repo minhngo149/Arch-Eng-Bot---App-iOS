@@ -52,11 +52,13 @@ final class AudioRecorder: NSObject {
         let filename = "user_voice_\(Int(Date().timeIntervalSince1970)).m4a"
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
 
+        // STT-friendly: 16 kHz mono AAC keeps the upload light while still
+        // giving Gemini enough fidelity to transcribe accurately.
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 44_100,
+            AVSampleRateKey: 16_000,
             AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue,
+            AVEncoderAudioQualityKey: AVAudioQuality.medium.rawValue,
         ]
 
         let recorder = try AVAudioRecorder(url: url, settings: settings)

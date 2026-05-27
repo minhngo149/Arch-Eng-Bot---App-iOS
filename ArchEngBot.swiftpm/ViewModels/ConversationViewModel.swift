@@ -32,10 +32,6 @@ final class ConversationViewModel {
             && !isUploadingAudio
     }
 
-    var currentTargetText: String? {
-        currentLesson?.dialogue.first?.text
-    }
-
     // MARK: - Lesson
 
     func loadTodayLesson() async {
@@ -136,10 +132,7 @@ final class ConversationViewModel {
         isUploadingAudio = true
         defer { isUploadingAudio = false }
         do {
-            let result = try await client.transcribeAudio(
-                audioURL: url,
-                targetText: currentTargetText
-            )
+            let result = try await client.transcribeAudio(audioURL: url)
             append(.init(role: .user, kind: .voiceTranscript(result)))
         } catch {
             let message = (error as? APIError)?.errorDescription ?? error.localizedDescription

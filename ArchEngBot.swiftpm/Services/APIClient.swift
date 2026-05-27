@@ -126,11 +126,21 @@ actor APIClient {
         return data
     }
 
-    // MARK: - Voice transcribe (BE endpoint TBD — task 3)
+    // MARK: - Speech-to-text
 
-    func transcribeAudio(audioURL: URL, targetText: String?) async throws -> TranscriptResult {
-        let url = baseURL.appendingPathComponent("/audio/transcribe")
-        var request = URLRequest(url: url)
+    /// Uploads a recorded `.m4a` to BE Gemini-backed STT and returns the
+    /// transcript + Vietnamese translation.
+    /// Contract: POST /api/speech-to-text?secret=...
+    /// multipart/form-data with a single field named `audio`.
+    func transcribeAudio(audioURL: URL) async throws -> TranscriptResult {
+        guard !secret.isEmpty else { throw APIError.missingSecret }
+        var components = URLComponents(
+            url: baseURL.appendingPathComponent("/api/speech-to-text"),
+            resolvingAgainstBaseURL: false
+        )!
+        components.queryItems = [URLQueryItem(name: "secret", value: secret)]
+
+        var request = URLRequest(url: components.url!)
         request.httpMethod = "POST"
         request.timeoutInterval = 60
 
@@ -139,11 +149,7 @@ actor APIClient {
                          forHTTPHeaderField: "Content-Type")
 
         do {
-            request.httpBody = try makeMultipartBody(
-                boundary: boundary,
-                targetText: targetText,
-                audioURL: audioURL
-            )
+            request.httpBody = try makeAudioMultipart(boundary: boundary, audioURL: audioURL)
         } catch {
             throw APIError.io(error)
         }
@@ -176,20 +182,12 @@ actor APIClient {
         return (data, http)
     }
 
-    private func makeMultipartBody(boundary: String,
-                                   targetText: String?,
-                                   audioURL: URL) throws -> Data {
+    private func makeAudioMultipart(boundary: String, audioURL: URL) throws -> Data {
         var body = Data()
         let crlf = "\r\n"
 
-        if let targetText, !targetText.isEmpty {
-            body.appendString("--\(boundary)\(crlf)")
-            body.appendString("Content-Disposition: form-data; name=\"target_text\"\(crlf)\(crlf)")
-            body.appendString("\(targetText)\(crlf)")
-        }
-
         body.appendString("--\(boundary)\(crlf)")
-        body.appendString("Content-Disposition: form-data; name=\"audio_file\"; filename=\"user_voice.m4a\"\(crlf)")
+        body.appendString("Content-Disposition: form-data; name=\"audio\"; filename=\"recording.m4a\"\(crlf)")
         body.appendString("Content-Type: audio/mp4\(crlf)\(crlf)")
         body.append(try Data(contentsOf: audioURL))
         body.appendString(crlf)

@@ -13,8 +13,12 @@ final class AudioPlayer: NSObject {
 
     private(set) var loadingText: String?
     private(set) var currentlyPlayingText: String?
+    /// Text whose last playback attempt failed. Cleared automatically after 3s
+    /// so VoicePlayButton can show a brief error indicator.
+    private(set) var failedText: String?
 
     private var player: AVAudioPlayer?
+    private var clearErrorTask: Task<Void, Never>?
     private let client: APIClient
 
     init(client: APIClient = .shared) {
@@ -48,6 +52,20 @@ final class AudioPlayer: NSObject {
         } catch {
             let ns = error as NSError
             print("[AudioPlayer] play FAILED: \(ns.localizedDescription) | code=\(ns.code) domain=\(ns.domain)")
+            flagError(for: text)
+        }
+    }
+
+    private func flagError(for text: String) {
+        failedText = text
+        clearErrorTask?.cancel()
+        clearErrorTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            await MainActor.run {
+                if self?.failedText == text {
+                    self?.failedText = nil
+                }
+            }
         }
     }
 

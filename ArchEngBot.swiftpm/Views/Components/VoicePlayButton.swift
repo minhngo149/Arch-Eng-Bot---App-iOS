@@ -15,6 +15,7 @@ struct VoicePlayButton: View {
 
     private var isLoading: Bool { player.loadingText == text }
     private var isPlaying: Bool { player.currentlyPlayingText == text }
+    private var hasError: Bool { player.failedText == text }
 
     private var iconColor: Color {
         if isPlaying {
@@ -41,6 +42,11 @@ struct VoicePlayButton: View {
                     ProgressView()
                         .controlSize(.mini)
                         .tint(onDarkBackground ? .white : .secondary)
+                } else if hasError {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: size, weight: .medium))
+                        .foregroundStyle(.red)
+                        .accessibilityLabel("Audio playback failed")
                 } else {
                     Image(systemName: isPlaying ? "speaker.wave.2.fill" : "speaker.wave.2")
                         .font(.system(size: size, weight: .medium))

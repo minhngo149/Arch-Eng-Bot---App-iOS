@@ -1,0 +1,42 @@
+name: ArchEngBot
+options:
+  bundleIdPrefix: com.archengbot
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  ArchEngBot:
+    type: application
+    platform: iOS
+    sources:
+      - path: ArchEngBot
+        excludes:
+          - "**/.DS_Store"
+          - "Resources/Info.plist"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.archengbot.app
+        PRODUCT_NAME: ArchEngBot
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ENABLE_PREVIEWS: YES
+        DEVELOPMENT_ASSET_PATHS: "\"ArchEngBot/Preview Content\""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_FILE: ArchEngBot/Resources/Info.plist
+      configs:
+        Debug:
+          API_BASE_URL: "http://127.0.0.1:8000"
+          API_SECRET: "dev-secret-change-me"
+        Release:
+          API_BASE_URL: "https://api.example.com"
+          API_SECRET: ""

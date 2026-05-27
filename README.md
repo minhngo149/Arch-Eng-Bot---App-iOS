@@ -14,6 +14,8 @@ dưới dạng tin nhắn từ "Coach", và có thể phản hồi bằng text h
 |---|---|---|
 | Lấy bài học hôm nay | Nút 📚 (`books.vertical.fill`) ở navbar | `GET /admin/lessons/today` → push lesson intro + vocab card + từng dialogue line vào chat |
 | Crawl bài học mới | Nút ✨ (`sparkles`) ở navbar | `POST /api/lessons/generate` — yêu cầu BE crawl Gemini sinh bài mới (source="manual") |
+| Nghe phát âm | Nút 🔊 cạnh mỗi vocab / dialogue line | `POST /api/text-to-speech` (BE TBD) — phát audio qua loa app bằng `AVAudioPlayer` |
+| Hiện/ẩn nghĩa VI | Nút 👁 VI cạnh mỗi vocab / dialogue line | Ẩn `meaning_vi` / `translation_vi` mặc định để user đọc thử tiếng Anh trước |
 | Gửi tin nhắn text | Nhập vào ô input → nút mũi tên | Append vào chat (chưa có AI reply — BE chat endpoint TBD) |
 | Ghi âm giọng nói | Nút **mic** ở input bar (xuất hiện khi ô text trống) | Record `.m4a` → upload `POST /audio/transcribe` (BE TBD) → transcript bubble |
 
@@ -131,7 +133,18 @@ POST {baseURL}/api/lessons/generate?secret={api_secret}
 ```
 BE gọi Gemini sinh bài mới (source="manual"), có thể mất 30–60s. Client timeout 120s.
 
-### 3. Voice → transcript (BE TBD)
+### 3. Text-to-speech (BE TBD)
+```
+POST {baseURL}/api/text-to-speech?secret={api_secret}
+Content-Type: application/json
+Body: {"text": "She sells seashells"}
+
+Response: raw audio bytes (audio/mpeg | audio/mp4 | audio/wav)
+```
+Client (`AudioPlayer.swift`) chỉ cần raw bytes — `AVAudioPlayer` tự detect format.
+Khi BE implement xong, nút 🔊 trong mỗi vocab/dialogue sẽ play được.
+
+### 4. Voice → transcript (BE TBD)
 ```
 POST {baseURL}/audio/transcribe
 multipart/form-data: target_text (optional), audio_file (audio/mp4)

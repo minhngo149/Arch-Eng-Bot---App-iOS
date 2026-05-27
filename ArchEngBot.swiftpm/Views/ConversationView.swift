@@ -33,12 +33,12 @@ struct ConversationView: View {
                         if viewModel.isLoadingLesson {
                             ProgressView()
                         } else {
-                            Label("Bài hôm nay", systemImage: "books.vertical.fill")
+                            Label("Today's lesson", systemImage: "books.vertical.fill")
                                 .labelStyle(.iconOnly)
                         }
                     }
                     .disabled(viewModel.isLoadingLesson || viewModel.isGeneratingLesson)
-                    .accessibilityLabel("Lấy bài học hôm nay")
+                    .accessibilityLabel("Load today's lesson")
 
                     Button {
                         Task { await viewModel.crawlNewLesson() }
@@ -46,12 +46,12 @@ struct ConversationView: View {
                         if viewModel.isGeneratingLesson {
                             ProgressView()
                         } else {
-                            Label("Tạo bài mới", systemImage: "sparkles")
+                            Label("New lesson", systemImage: "sparkles")
                                 .labelStyle(.iconOnly)
                         }
                     }
                     .disabled(viewModel.isLoadingLesson || viewModel.isGeneratingLesson)
-                    .accessibilityLabel("Crawl bài học mới")
+                    .accessibilityLabel("Generate new lesson")
                 }
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.85),
@@ -91,7 +91,7 @@ struct ConversationView: View {
         HStack(spacing: 12) {
             if viewModel.isUploadingAudio {
                 ProgressView()
-                Text("Đang nhận diện giọng nói…")
+                Text("Transcribing…")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             } else {

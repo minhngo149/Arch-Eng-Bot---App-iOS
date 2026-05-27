@@ -63,7 +63,7 @@ final class ConversationViewModel {
         isGeneratingLesson = true
         errorBanner = nil
         append(.init(role: .system,
-                     kind: .text("Đang crawl bài học mới từ Gemini, có thể mất 30-60 giây...")))
+                     kind: .text("Crawling a new lesson from Gemini — this may take 30-60 seconds…")))
         defer { isGeneratingLesson = false }
 
         do {
@@ -81,7 +81,7 @@ final class ConversationViewModel {
             let lesson = try await client.fetchLatestLesson()
             await ingestLesson(lesson)
             append(.init(role: .system,
-                         kind: .text("Chưa có bài hôm nay — đã dùng bài gần nhất.")))
+                         kind: .text("No lesson for today yet — showing the most recent one.")))
         } catch {
             errorBanner = (error as? APIError)?.errorDescription ?? error.localizedDescription
         }
@@ -97,7 +97,7 @@ final class ConversationViewModel {
             append(.init(role: .coach, kind: .dialogueLine(line)))
         }
         append(.init(role: .system,
-                     kind: .text("Hãy phản hồi bằng text hoặc nhấn micro để đọc theo.")))
+                     kind: .text("Reply by text, or tap the mic to read along.")))
     }
 
     // MARK: - User input
@@ -125,7 +125,7 @@ final class ConversationViewModel {
         do {
             try await recorder.start()
             if case .denied = recorder.state {
-                errorBanner = "Cần cấp quyền micro trong Cài đặt → ArchEngBot."
+                errorBanner = "Microphone access denied. Open Settings → ArchEngBot to allow."
             }
         } catch {
             errorBanner = error.localizedDescription
@@ -160,7 +160,7 @@ final class ConversationViewModel {
     private func appendSystemWelcome() {
         append(.init(
             role: .system,
-            kind: .text("Chào! Nhấn 📚 để lấy bài học hôm nay, hoặc ✨ để crawl bài mới.")
+            kind: .text("Welcome! Tap 📚 above for today's lesson, or ✨ to generate a new one.")
         ))
     }
 }

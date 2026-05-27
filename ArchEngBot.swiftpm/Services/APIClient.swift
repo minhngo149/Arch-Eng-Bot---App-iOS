@@ -10,16 +10,16 @@ enum APIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Phản hồi không hợp lệ từ máy chủ."
+            return "Invalid response from server."
         case .http(let code, let body):
-            if let body, !body.isEmpty { return "Lỗi \(code): \(body)" }
-            return "Máy chủ trả về lỗi \(code)."
+            if let body, !body.isEmpty { return "HTTP \(code): \(body)" }
+            return "Server returned HTTP \(code)."
         case .decoding(let err):
-            return "Không đọc được phản hồi: \(err.localizedDescription)"
+            return "Could not parse response: \(err.localizedDescription)"
         case .io(let err):
             return err.localizedDescription
         case .missingSecret:
-            return "Thiếu API secret. Tạo Resources/Config.json từ Config.json.example và điền secret."
+            return "Missing API secret. Copy Resources/Config.json.example to Config.json and fill in your secret."
         }
     }
 }
@@ -94,6 +94,36 @@ actor APIClient {
         } catch {
             throw APIError.decoding(error)
         }
+    }
+
+    // MARK: - Text-to-speech (BE endpoint TBD)
+
+    /// Sends `text` to BE; expects raw audio bytes back (mp3 / m4a / wav —
+    /// AVAudioPlayer auto-detects). Contract: POST /api/text-to-speech?secret=...
+    /// JSON body {"text": "..."}.
+    func textToSpeech(text: String) async throws -> Data {
+        guard !secret.isEmpty else { throw APIError.missingSecret }
+        var components = URLComponents(
+            url: baseURL.appendingPathComponent("/api/text-to-speech"),
+            resolvingAgainstBaseURL: false
+        )!
+        components.queryItems = [URLQueryItem(name: "secret", value: secret)]
+
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("audio/*", forHTTPHeaderField: "Accept")
+        request.timeoutInterval = 30
+
+        let body = ["text": text]
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        } catch {
+            throw APIError.io(error)
+        }
+
+        let (data, _) = try await sendRequest(request)
+        return data
     }
 
     // MARK: - Voice transcribe (BE endpoint TBD — task 3)

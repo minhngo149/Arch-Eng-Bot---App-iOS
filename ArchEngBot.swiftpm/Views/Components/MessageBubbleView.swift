@@ -108,7 +108,7 @@ private struct LessonIntroCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Bài học \(lesson.lessonDate)", systemImage: "calendar")
+            Label("Lesson · \(lesson.lessonDate)", systemImage: "calendar")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
             Text(lesson.topic)
@@ -125,7 +125,7 @@ private struct VocabListCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Từ vựng (\(vocab.count))", systemImage: "text.book.closed.fill")
+            Label("Vocabulary (\(vocab.count))", systemImage: "text.book.closed.fill")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 8) {
@@ -134,15 +134,16 @@ private struct VocabListCard: View {
                 }
             }
         }
-        .frame(maxWidth: 320, alignment: .leading)
+        .frame(maxWidth: 340, alignment: .leading)
     }
 }
 
 private struct VocabRow: View {
     let item: Vocab
+    @State private var showVi: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Text(item.word)
                     .font(.subheadline.weight(.semibold))
@@ -151,14 +152,24 @@ private struct VocabRow: View {
                 Text(item.partOfSpeech)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Spacer(minLength: 0)
+                Spacer(minLength: 4)
                 Text(item.pronunciationIpa)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.blue)
+                VoicePlayButton(text: item.word, size: 14)
+                ShowViToggle(isOn: $showVi)
             }
-            Text(item.meaningVi)
-                .font(.caption)
-                .foregroundStyle(.primary)
+
+            if showVi {
+                Text(item.meaningVi)
+                    .font(.caption)
+                    .foregroundStyle(.primary)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity
+                    ))
+            }
+
             Text("e.g., \(item.exampleSentence)")
                 .font(.caption2)
                 .italic()
@@ -168,6 +179,7 @@ private struct VocabRow: View {
         .padding(8)
         .background(Color(.tertiarySystemGroupedBackground),
                     in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .animation(.easeInOut(duration: 0.2), value: showVi)
     }
 }
 
@@ -175,24 +187,62 @@ private struct VocabRow: View {
 
 private struct DialogueLineCard: View {
     let line: DialogueMessage
+    @State private var showVi: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Text(line.speaker)
                     .font(.caption.weight(.bold))
                 Text("(\(line.speakerRole))")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
+                Spacer(minLength: 4)
+                VoicePlayButton(text: line.text, size: 14)
+                ShowViToggle(isOn: $showVi)
             }
             Text(line.text)
                 .font(.callout)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(line.translationVi)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if showVi {
+                Text(line.translationVi)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity
+                    ))
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: showVi)
+    }
+}
+
+// MARK: - Show VI toggle
+
+private struct ShowViToggle: View {
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Button {
+            isOn.toggle()
+        } label: {
+            HStack(spacing: 3) {
+                Image(systemName: isOn ? "eye.slash.fill" : "eye")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("VI")
+                    .font(.system(size: 10, weight: .bold))
+            }
+            .foregroundStyle(isOn ? Color.white : Color.secondary)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
+            .background(
+                Capsule().fill(isOn ? Color.blue : Color.gray.opacity(0.15))
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(isOn ? "Hide Vietnamese translation" : "Show Vietnamese translation")
     }
 }
 
@@ -228,10 +278,10 @@ private struct VoiceTranscriptCard: View {
 #Preview {
     ScrollView {
         VStack(alignment: .leading, spacing: 12) {
-            MessageBubbleView(message: .init(role: .system, kind: .text("Chào! Nhấn nút 📚 phía trên để lấy bài học.")))
+            MessageBubbleView(message: .init(role: .system, kind: .text("Tap 📚 above to load today's lesson, or ✨ to generate a new one.")))
             MessageBubbleView(message: .init(role: .coach, kind: .text("Welcome to today's lesson.")))
             MessageBubbleView(message: .init(role: .user, kind: .text("Hi! I'm ready.")))
-            MessageBubbleView(message: .init(role: .user, kind: .voiceTranscript(TranscriptResult(transcript: "She sells seashells.", matchesTarget: true, feedback: "Phát âm chuẩn!"))))
+            MessageBubbleView(message: .init(role: .user, kind: .voiceTranscript(TranscriptResult(transcript: "She sells seashells.", matchesTarget: true, feedback: "Nice pronunciation!"))))
         }
         .padding()
     }

@@ -11,7 +11,7 @@ struct ChatInputBar: View {
         VStack(spacing: 0) {
             Divider()
             HStack(alignment: .bottom, spacing: 10) {
-                TextField("Nhập câu trả lời…", text: $draft, axis: .vertical)
+                TextField("Type a reply…", text: $draft, axis: .vertical)
                     .lineLimit(1...4)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
@@ -71,7 +71,7 @@ private struct MicButton: View {
         }
         .buttonStyle(.plain)
         .onAppear { pulse = true }
-        .accessibilityLabel(isRecording ? "Dừng ghi âm" : "Bắt đầu ghi âm")
+        .accessibilityLabel(isRecording ? "Stop recording" : "Start recording")
     }
 }
 
@@ -92,7 +92,7 @@ private struct SendButton: View {
         }
         .buttonStyle(.plain)
         .disabled(!canSend)
-        .accessibilityLabel("Gửi tin nhắn")
+        .accessibilityLabel("Send message")
     }
 }
 

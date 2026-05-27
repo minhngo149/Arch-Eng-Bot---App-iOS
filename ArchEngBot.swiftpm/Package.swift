@@ -19,7 +19,7 @@ let package = Package(
             bundleIdentifier: "com.archengbot.app",
             displayVersion: "0.1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .magicWand),
+            appIcon: .placeholder(icon: .openBook),
             accentColor: .presetColor(.green),
             supportedDeviceFamilies: [
                 .pad,
@@ -29,8 +29,8 @@ let package = Package(
                 .portrait
             ],
             capabilities: [
-                .outgoingNetworkConnections(),
-                .microphone(purposeString: "App cần truy cập micro để ghi âm giọng đọc của bạn và chấm điểm phát âm bằng AI.")
+                .microphone(purposeString: "ArchEngBot uses the microphone to record your speech so the AI tutor can transcribe and grade your pronunciation."),
+                .outgoingNetworkConnections()
             ]
         )
     ],

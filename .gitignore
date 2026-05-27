@@ -3,8 +3,7 @@ ArchEngBot.swiftpm/Resources/Config.json
 
 # Swift Package Manager / Playgrounds
 .build/
-.swiftpm/xcode/
-.swiftpm/configuration/
+.swiftpm/
 Package.resolved
 
 # Xcode (in case anyone opens .swiftpm in Xcode)

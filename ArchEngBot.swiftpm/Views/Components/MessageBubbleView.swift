@@ -122,6 +122,7 @@ private struct LessonIntroCard: View {
 
 private struct VocabListCard: View {
     let vocab: [Vocab]
+    @Environment(\.horizontalSizeClass) private var hSizeClass
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -134,7 +135,13 @@ private struct VocabListCard: View {
                 }
             }
         }
-        .frame(maxWidth: 340, alignment: .leading)
+        // Compact (iPhone portrait): fill the bubble area until the trailing
+        // Spacer's minLength kicks in. Regular (iPad / Mac Catalyst): cap at
+        // ~520pt so the card sits around half-screen and stays readable.
+        .frame(
+            maxWidth: hSizeClass == .regular ? 520 : .infinity,
+            alignment: .leading
+        )
     }
 }
 

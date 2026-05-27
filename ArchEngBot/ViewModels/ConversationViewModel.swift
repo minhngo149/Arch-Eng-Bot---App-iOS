@@ -7,6 +7,7 @@ final class ConversationViewModel {
     var messages: [ChatMessage] = []
     var draft: String = ""
     var isLoadingLesson: Bool = false
+    var isGeneratingLesson: Bool = false
     var isUploadingAudio: Bool = false
     var errorBanner: String?
     private(set) var currentLesson: Lesson?
@@ -54,6 +55,24 @@ final class ConversationViewModel {
             }
         } catch {
             errorBanner = error.localizedDescription
+        }
+    }
+
+    func crawlNewLesson() async {
+        guard !isGeneratingLesson else { return }
+        isGeneratingLesson = true
+        errorBanner = nil
+        append(.init(role: .system,
+                     kind: .text("Đang crawl bài học mới từ Gemini, có thể mất 30-60 giây...")))
+        defer { isGeneratingLesson = false }
+
+        do {
+            let lesson = try await client.generateNewLesson()
+            await ingestLesson(lesson)
+        } catch {
+            let message = (error as? APIError)?.errorDescription ?? error.localizedDescription
+            errorBanner = message
+            append(.init(role: .system, kind: .error(message)))
         }
     }
 
@@ -141,7 +160,7 @@ final class ConversationViewModel {
     private func appendSystemWelcome() {
         append(.init(
             role: .system,
-            kind: .text("Chào! Nhấn nút 📚 phía trên để lấy bài học hôm nay.")
+            kind: .text("Chào! Nhấn 📚 để lấy bài học hôm nay, hoặc ✨ để crawl bài mới.")
         ))
     }
 }

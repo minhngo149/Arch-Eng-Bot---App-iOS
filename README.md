@@ -8,7 +8,8 @@ tin nhắn từ "Coach", và có thể phản hồi bằng text hoặc voice.
 
 | Thao tác | Trigger | Behavior |
 |---|---|---|
-| Lấy bài học hôm nay | Nút **Lấy bài học** ở navbar (top-right) | `GET /admin/lessons/today` → push lesson intro + vocab card + từng dialogue line vào chat |
+| Lấy bài học hôm nay | Nút 📚 ở navbar | `GET /admin/lessons/today` → push lesson intro + vocab card + từng dialogue line vào chat |
+| Crawl bài học mới | Nút ✨ ở navbar | `POST /api/lessons/generate` — yêu cầu BE crawl Gemini sinh bài mới (source="manual"), không đụng vào bài cron của hôm đó |
 | Gửi tin nhắn text | Nhập vào ô input → nút mũi tên | Append vào chat (chưa có AI reply — BE chat endpoint TBD) |
 | Ghi âm giọng nói | Nút **mic** ở input bar (xuất hiện khi ô text trống) | Record `.m4a` → upload `POST /audio/transcribe` → hiển thị transcript + match result trong chat |
 
@@ -134,7 +135,16 @@ Response (decode bằng [`Lesson`](ArchEngBot/Models/Lesson.swift)):
 Nếu BE trả `404` → app fallback `GET /admin/lessons/latest` và hiện banner
 "Chưa có bài hôm nay — đã dùng bài gần nhất.".
 
-### 2. Voice → transcript (BE TBD — task 3)
+### 2. Crawl bài học mới (manual generate)
+```
+POST {baseURL}/api/lessons/generate?secret={API_SECRET}
+```
+BE sẽ gọi Gemini sinh bài mới (source="manual"), lưu vào DB, trả về lesson.
+Có thể mất 30–60s vì gọi qua Gemini. App giữ timeout 120s.
+Response shape: hoặc là `Lesson` trực tiếp, hoặc envelope `{"created": bool, "lesson": Lesson}`
+— client đã handle cả 2.
+
+### 3. Voice → transcript (BE TBD — task 3)
 ```
 POST {baseURL}/audio/transcribe
 Content-Type: multipart/form-data

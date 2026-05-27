@@ -26,18 +26,32 @@ struct ConversationView: View {
             .navigationTitle("ArchEngBot")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
                     Button {
                         Task { await viewModel.loadTodayLesson() }
                     } label: {
                         if viewModel.isLoadingLesson {
                             ProgressView()
                         } else {
-                            Label("Lấy bài học", systemImage: "books.vertical.fill")
-                                .labelStyle(.titleAndIcon)
+                            Label("Bài hôm nay", systemImage: "books.vertical.fill")
+                                .labelStyle(.iconOnly)
                         }
                     }
-                    .disabled(viewModel.isLoadingLesson)
+                    .disabled(viewModel.isLoadingLesson || viewModel.isGeneratingLesson)
+                    .accessibilityLabel("Lấy bài học hôm nay")
+
+                    Button {
+                        Task { await viewModel.crawlNewLesson() }
+                    } label: {
+                        if viewModel.isGeneratingLesson {
+                            ProgressView()
+                        } else {
+                            Label("Tạo bài mới", systemImage: "sparkles")
+                                .labelStyle(.iconOnly)
+                        }
+                    }
+                    .disabled(viewModel.isLoadingLesson || viewModel.isGeneratingLesson)
+                    .accessibilityLabel("Crawl bài học mới")
                 }
             }
             .animation(.spring(response: 0.4, dampingFraction: 0.85),

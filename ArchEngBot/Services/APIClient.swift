@@ -69,6 +69,33 @@ actor APIClient {
         }
     }
 
+    /// Triggers BE to crawl Gemini for a brand-new lesson (source="manual").
+    /// Does not affect the scheduled cron lesson. Returns the freshly created lesson.
+    func generateNewLesson() async throws -> Lesson {
+        guard !secret.isEmpty else { throw APIError.missingSecret }
+        var components = URLComponents(
+            url: baseURL.appendingPathComponent("/api/lessons/generate"),
+            resolvingAgainstBaseURL: false
+        )!
+        components.queryItems = [URLQueryItem(name: "secret", value: secret)]
+
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 120  // Gemini generation can be slow
+
+        let (data, _) = try await sendRequest(request)
+        let decoder = JSONDecoder()
+        // BE may return either the lesson directly or an envelope {created, lesson}.
+        if let lesson = try? decoder.decode(Lesson.self, from: data) {
+            return lesson
+        }
+        do {
+            return try decoder.decode(GenerateLessonEnvelope.self, from: data).lesson
+        } catch {
+            throw APIError.decoding(error)
+        }
+    }
+
     // MARK: - Voice transcribe (BE endpoint TBD — task 3)
 
     func transcribeAudio(audioURL: URL, targetText: String?) async throws -> TranscriptResult {
@@ -140,6 +167,11 @@ actor APIClient {
         body.appendString("--\(boundary)--\(crlf)")
         return body
     }
+}
+
+private struct GenerateLessonEnvelope: Decodable {
+    let created: Bool?
+    let lesson: Lesson
 }
 
 private extension Data {

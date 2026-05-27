@@ -61,7 +61,7 @@ actor APIClient {
         request.httpMethod = "GET"
         request.timeoutInterval = 30
 
-        let (data, response) = try await sendRequest(request)
+        let (data, _) = try await sendRequest(request)
         do {
             return try JSONDecoder().decode(Lesson.self, from: data)
         } catch {

@@ -46,7 +46,7 @@ final class AudioRecorder: NSObject {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord,
                                 mode: .default,
-                                options: [.defaultToSpeaker, .allowBluetooth])
+                                options: [.defaultToSpeaker, .allowBluetoothHFP])
         try session.setActive(true)
 
         let filename = "user_voice_\(Int(Date().timeIntervalSince1970)).m4a"

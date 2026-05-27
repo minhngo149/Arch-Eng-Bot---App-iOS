@@ -29,6 +29,7 @@ let package = Package(
                 .portrait
             ],
             capabilities: [
+                .outgoingNetworkConnections(),
                 .microphone(purposeString: "App cần truy cập micro để ghi âm giọng đọc của bạn và chấm điểm phát âm bằng AI.")
             ]
         )

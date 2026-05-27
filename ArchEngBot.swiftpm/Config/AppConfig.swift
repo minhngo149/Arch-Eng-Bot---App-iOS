@@ -5,12 +5,18 @@ import Foundation
 enum AppConfig {
     static let baseURL: URL = {
         if let raw = file.apiBaseURL, let url = URL(string: raw), !raw.isEmpty {
+            print("[AppConfig] baseURL = \(url.absoluteString)")
             return url
         }
+        print("[AppConfig] api_base_url missing/invalid — falling back to localhost")
         return URL(string: "http://127.0.0.1:8000")!
     }()
 
-    static let apiSecret: String = file.apiSecret ?? ""
+    static let apiSecret: String = {
+        let value = file.apiSecret ?? ""
+        print("[AppConfig] apiSecret \(value.isEmpty ? "EMPTY" : "set (\(value.count) chars)")")
+        return value
+    }()
 
     // MARK: - Loading
 

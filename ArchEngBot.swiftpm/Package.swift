@@ -16,16 +16,13 @@ let package = Package(
             teamIdentifier: "",
             displayVersion: "0.1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .graduationcap),
             accentColor: .presetColor(.blue),
             supportedDeviceFamilies: [
                 .pad,
                 .phone
             ],
             supportedInterfaceOrientations: [
-                .portrait,
-                .landscapeRight(.when(deviceFamilies: [.pad])),
-                .landscapeLeft(.when(deviceFamilies: [.pad]))
+                .portrait
             ],
             capabilities: [
                 .microphone(purposeString: "App cần truy cập micro để ghi âm giọng đọc của bạn và chấm điểm phát âm bằng AI.")

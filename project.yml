@@ -35,8 +35,9 @@ targets:
         INFOPLIST_FILE: ArchEngBot/Resources/Info.plist
       configs:
         Debug:
-          API_BASE_URL: "http://127.0.0.1:8000"
-          API_SECRET: "dev-secret-change-me"
+          API_BASE_URL: "https://arch-eng-bot---be.fly.dev"
+          # Set locally — never commit. See README "Cấu hình secret".
+          API_SECRET: ""
         Release:
-          API_BASE_URL: "https://api.example.com"
+          API_BASE_URL: "https://arch-eng-bot---be.fly.dev"
           API_SECRET: ""

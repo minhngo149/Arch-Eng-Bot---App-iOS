@@ -54,7 +54,8 @@ arch-eng-bot-app-ios/
 - macOS có **Xcode 15+** (cài qua App Store)
 - **XcodeGen** (`brew install xcodegen`)
 - iOS 17+ simulator hoặc thiết bị thật
-- Backend [arch-eng-bot-be](../arch-eng-bot-be) chạy tại `http://127.0.0.1:8000`
+- Backend [arch-eng-bot-be](../arch-eng-bot-be) đã deploy production tại
+  `https://arch-eng-bot---be.fly.dev` (Fly.io)
 
 ## Setup
 
@@ -74,15 +75,38 @@ Trong Xcode: chọn simulator (iPhone 15+) → bấm **Run** (⌘R).
 Hai key được inject từ build settings (`project.yml`) qua Info.plist vào
 [AppConfig.swift](ArchEngBot/Config/AppConfig.swift):
 
-| Key | Debug | Release |
-|---|---|---|
-| `API_BASE_URL` | `http://127.0.0.1:8000` | `https://api.example.com` (sửa khi deploy) |
-| `API_SECRET`   | `dev-secret-change-me` (đổi cho khớp BE `.env`) | (để trống — phải set trước khi build release) |
+| Key | Default committed |
+|---|---|
+| `API_BASE_URL` | `https://arch-eng-bot---be.fly.dev` (production Fly.io) |
+| `API_SECRET`   | `""` — **bạn phải fill in local trước khi build** |
 
-> **Secret hiện đang dùng để gọi `/admin/lessons/*` của BE.** Khi BE
-> mở public iOS endpoints (task 2), bỏ secret khỏi `APIClient` và `AppConfig`.
+> **Secret hiện được dùng làm `?secret=...` cho `/admin/lessons/*`** vì BE
+> chưa mở public iOS endpoints. Khi task 2 xong, secret sẽ bị bỏ.
+
+### Cấu hình secret (không bao giờ commit)
+
+Edit local `project.yml`:
+
+```yaml
+configs:
+  Debug:
+    API_BASE_URL: "https://arch-eng-bot---be.fly.dev"
+    API_SECRET: "<dán secret prod ở đây>"
+  Release:
+    ...
+```
+
+Rồi chạy lại `xcodegen generate`. File `ArchEngBot.xcodeproj/` đã được
+gitignore nên build settings (kèm secret) không bị commit. **Chỉ cần
+cẩn thận đừng commit lại `project.yml` đã chứa secret** — chạy `git diff project.yml`
+trước khi commit.
+
+Để chạy local BE (`http://127.0.0.1:8000`) thay vì production: đổi
+`API_BASE_URL` của config Debug; Info.plist đã enable `NSAllowsLocalNetworking`.
 
 ## API contract iOS đang gọi
+
+Production: `https://arch-eng-bot---be.fly.dev` ([health check](https://arch-eng-bot---be.fly.dev/health)).
 
 ### 1. Lấy bài học hôm nay
 ```
